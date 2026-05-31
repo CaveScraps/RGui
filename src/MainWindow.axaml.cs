@@ -16,6 +16,7 @@ public partial class MainWindow : Window
 {
     private readonly ObservableCollection<ResultItem> _results = new();
     private CancellationTokenSource? _cts;
+    private bool _animating;
 
     public MainWindow()
     {
@@ -41,7 +42,9 @@ public partial class MainWindow : Window
 
         SearchBtn.IsEnabled = false;
         CancelBtn.IsEnabled = true;
-        StatusText.Text = "Searching…";
+        StatusText.Text = "Searching";
+        _animating = true;
+        _ = AnimateDotsAsync();
 
         try
         {
@@ -89,6 +92,7 @@ public partial class MainWindow : Window
             return;
         }
 
+        _animating = false;
         SearchBtn.IsEnabled = true;
         CancelBtn.IsEnabled = false;
         StatusText.Text = ct.IsCancellationRequested
@@ -116,5 +120,17 @@ public partial class MainWindow : Window
     {
         if (ResultsList.SelectedItem is ResultItem r)
             RGuiUtils.OpenFile(r);
+    }
+
+    private async Task AnimateDotsAsync()
+    {
+        string[] frames = [".  ", ".. ", "..."];
+        var i = 0;
+        while (_animating)
+        {
+            DotsText.Text = frames[i++ % 3];
+            await Task.Delay(400);
+        }
+        DotsText.Text = "";
     }
 }

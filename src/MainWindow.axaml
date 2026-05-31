@@ -53,7 +53,12 @@
 
         <!-- Bottom: status bar -->
         <Border DockPanel.Dock="Bottom" Padding="12,4">
-            <TextBlock x:Name="StatusText" Text="Ready" FontSize="12" Opacity="0.6"/>
+            <StackPanel Orientation="Horizontal" Spacing="4">
+                <TextBlock x:Name="StatusText" Text="Ready" FontSize="12" Opacity="0.6"/>
+                <TextBlock x:Name="DotsText"
+                           FontFamily="Cascadia Code,Consolas,Courier New,monospace"
+                           FontSize="12" Opacity="0.6"/>
+            </StackPanel>
         </Border>
 
         <!-- Centre: results list -->
