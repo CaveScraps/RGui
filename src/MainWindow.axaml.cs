@@ -1,5 +1,6 @@
 using System;
-using System.Collections.ObjectModel;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Threading;
@@ -14,7 +15,7 @@ namespace RGui;
 
 public partial class MainWindow : Window
 {
-    private readonly ObservableCollection<ResultItem> _results = new();
+    private readonly BulkObservableCollection<ResultItem> _results = new();
     private CancellationTokenSource? _cts;
     private bool _animating;
 
@@ -30,12 +31,15 @@ public partial class MainWindow : Window
         var pattern = PatternBox.Text ?? "";
         if (string.IsNullOrWhiteSpace(pattern)) return;
 
-        // Snapshot UI state before going off-thread
         var path = PathBox.Text ?? ".";
         var caseSensitive = CaseSensitiveCheck.IsChecked ?? true;
         var useRegex = RegexCheck.IsChecked ?? true;
 
         _results.Clear();
+
+        // Local queue per search — abandoned queues are GC'd with no drain cost on the UI thread
+        var pending = new ConcurrentQueue<ResultItem>();
+
         _cts = new CancellationTokenSource();
         var ct = _cts.Token;
         var count = 0;
@@ -45,6 +49,10 @@ public partial class MainWindow : Window
         StatusText.Text = "Searching";
         _animating = true;
         _ = AnimateDotsAsync();
+
+        var flushTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
+        flushTimer.Tick += (_, _) => FlushPending(pending);
+        flushTimer.Start();
 
         try
         {
@@ -73,7 +81,7 @@ public partial class MainWindow : Window
                         var item = RGuiUtils.ParseLine(line);
                         if (item is null) continue;
                         count++;
-                        Dispatcher.UIThread.Post(() => _results.Add(item));
+                        pending.Enqueue(item);
                     }
                     await proc.WaitForExitAsync(ct);
                 }
@@ -83,21 +91,48 @@ public partial class MainWindow : Window
                 }
             });
         }
-        catch (OperationCanceledException) { }
+        catch (OperationCanceledException)
+        {
+            // Cancelled — stop the timer and drop the pending queue (no drain)
+            flushTimer.Stop();
+            _animating = false;
+            SearchBtn.IsEnabled = true;
+            CancelBtn.IsEnabled = false;
+            StatusText.Text = "Cancelled";
+            return;
+        }
         catch (Exception ex)
         {
+            flushTimer.Stop();
+            _animating = false;
             StatusText.Text = $"Error: {ex.Message}";
             SearchBtn.IsEnabled = true;
             CancelBtn.IsEnabled = false;
             return;
         }
 
+        flushTimer.Stop();
+
+        // Flush whatever arrived after the last timer tick
+        var tail = new List<ResultItem>();
+        while (pending.TryDequeue(out var item))
+            tail.Add(item);
+        if (tail.Count > 0)
+            _results.AddRange(tail);
+
         _animating = false;
         SearchBtn.IsEnabled = true;
         CancelBtn.IsEnabled = false;
-        StatusText.Text = ct.IsCancellationRequested
-            ? "Cancelled"
-            : $"{count} {(count == 1 ? "match" : "matches")}";
+        StatusText.Text = $"{count} {(count == 1 ? "match" : "matches")}";
+    }
+
+    private void FlushPending(ConcurrentQueue<ResultItem> pending)
+    {
+        var batch = new List<ResultItem>();
+        while (pending.TryDequeue(out var item) && batch.Count < 200)
+            batch.Add(item);
+        if (batch.Count > 0)
+            _results.AddRange(batch);
     }
 
     private void OnCancel(object? sender, RoutedEventArgs e) => _cts?.Cancel();

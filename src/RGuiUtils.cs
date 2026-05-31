@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
@@ -5,6 +8,18 @@ using System.Text.Json;
 namespace RGui;
 
 public record ResultItem(string FilePath, int LineNumber, string Display);
+
+// ObservableCollection with AddRange that fires a single Reset notification
+// instead of one CollectionChanged per item, keeping the UI thread unblocked.
+public class BulkObservableCollection<T> : ObservableCollection<T>
+{
+    public void AddRange(IEnumerable<T> items)
+    {
+        foreach (var item in items)
+            Items.Add(item);
+        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+    }
+}
 
 public static class RGuiUtils
 {
