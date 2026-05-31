@@ -1,0 +1,21 @@
+# Build output
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+.vs/
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# Published output
+dist/
+
+# NuGet
+*.nupkg
+project.lock.json
