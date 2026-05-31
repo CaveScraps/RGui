@@ -3,8 +3,20 @@
         xmlns:local="using:RGui"
         x:Class="RGui.MainWindow"
         Title="RGui — ripgrep"
-        Width="900" Height="650"
+        Width="1200" Height="800"
         MinWidth="500" MinHeight="300">
+
+    <Window.Styles>
+        <Style Selector="TextBox">
+            <Setter Property="FontSize" Value="18"/>
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="FontSize" Value="18"/>
+        </Style>
+        <Style Selector="CheckBox">
+            <Setter Property="FontSize" Value="18"/>
+        </Style>
+    </Window.Styles>
 
     <DockPanel>
 
@@ -54,10 +66,10 @@
         <!-- Bottom: status bar -->
         <Border DockPanel.Dock="Bottom" Padding="12,4">
             <StackPanel Orientation="Horizontal" Spacing="4">
-                <TextBlock x:Name="StatusText" Text="Ready" FontSize="12" Opacity="0.6"/>
+                <TextBlock x:Name="StatusText" Text="Ready" FontSize="18" Opacity="0.6"/>
                 <TextBlock x:Name="DotsText"
                            FontFamily="Cascadia Code,Consolas,Courier New,monospace"
-                           FontSize="12" Opacity="0.6"/>
+                           FontSize="18" Opacity="0.6"/>
             </StackPanel>
         </Border>
 
@@ -69,7 +81,7 @@
                 <DataTemplate x:DataType="local:ResultItem">
                     <TextBlock Text="{Binding Display}"
                                FontFamily="Cascadia Code,Consolas,Courier New,monospace"
-                               FontSize="13"
+                               FontSize="18"
                                TextTrimming="CharacterEllipsis"/>
                 </DataTemplate>
             </ListBox.ItemTemplate>
