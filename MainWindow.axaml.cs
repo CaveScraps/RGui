@@ -56,7 +56,7 @@ public partial class MainWindow : Window
 
                 proc.StartInfo.ArgumentList.Add("--json");
                 if (!caseSensitive) proc.StartInfo.ArgumentList.Add("--ignore-case");
-                if (!useRegex)      proc.StartInfo.ArgumentList.Add("--fixed-strings");
+                if (!useRegex) proc.StartInfo.ArgumentList.Add("--fixed-strings");
                 proc.StartInfo.ArgumentList.Add("--");
                 proc.StartInfo.ArgumentList.Add(pattern);
                 proc.StartInfo.ArgumentList.Add(path);

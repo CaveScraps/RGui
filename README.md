@@ -15,6 +15,19 @@ A cross-platform desktop GUI for [ripgrep](https://github.com/BurntSushi/ripgrep
 - [.NET 10](https://dotnet.microsoft.com/download)
 - [ripgrep](https://github.com/BurntSushi/ripgrep#installation) (`rg` must be on your `PATH`)
 
+## Development Setup
+
+<details>
+<summary>Click to see...</summary>
+
+After cloning, activate the git hooks:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+This enables the pre-commit format check (`dotnet format --verify-no-changes`).
+
 ## Build & Run
 
 ```bash
@@ -33,8 +46,8 @@ dotnet publish -c Release -r osx-arm64 --self-contained -p:PublishSingleFile=tru
 # Windows
 dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
 ```
-
 Output lands in `bin/Release/net10.0/<rid>/publish/`.
+</details>
 
 ## Acknowledgements
 
