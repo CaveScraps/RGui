@@ -4,6 +4,8 @@ A cross-platform desktop GUI for [ripgrep](https://github.com/BurntSushi/ripgrep
 
 ![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)
 
+![Screenshot](.github/images/Search.png)
+
 ## Features
 
 - Live-streaming results as ripgrep finds them
