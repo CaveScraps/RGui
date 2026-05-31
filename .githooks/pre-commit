@@ -1,4 +1,7 @@
 #!/bin/sh
+# Skip format check if there are no staged files — commit will fail anyway
+git diff --cached --quiet && exit 0
+
 echo "Running format check..."
 dotnet format --verify-no-changes
 if [ $? -ne 0 ]; then
