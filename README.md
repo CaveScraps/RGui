@@ -38,13 +38,13 @@ dotnet run
 
 ```bash
 # Linux
-dotnet publish -c Release -r linux-x64 --self-contained -p:PublishSingleFile=true
+dotnet publish -c Release -r linux-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
 
 # macOS (Apple Silicon)
-dotnet publish -c Release -r osx-arm64 --self-contained -p:PublishSingleFile=true
+dotnet publish -c Release -r osx-arm64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
 
 # Windows
-dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
+dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
 ```
 Output lands in `bin/Release/net10.0/<rid>/publish/`.
 </details>
