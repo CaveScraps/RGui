@@ -2,7 +2,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -12,8 +11,6 @@ using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 
 namespace RGui;
-
-public record ResultItem(string FilePath, int LineNumber, string Display);
 
 public partial class MainWindow : Window
 {
@@ -70,7 +67,7 @@ public partial class MainWindow : Window
                     string? line;
                     while ((line = await proc.StandardOutput.ReadLineAsync(ct)) != null)
                     {
-                        var item = ParseLine(line);
+                        var item = RGuiUtils.ParseLine(line);
                         if (item is null) continue;
                         count++;
                         Dispatcher.UIThread.Post(() => _results.Add(item));
@@ -118,40 +115,6 @@ public partial class MainWindow : Window
     private void ResultsList_DoubleTapped(object? sender, TappedEventArgs e)
     {
         if (ResultsList.SelectedItem is ResultItem r)
-            OpenFile(r);
-    }
-
-    private static void OpenFile(ResultItem r)
-    {
-        // Try VS Code with --goto for line support; fall back to system default
-        try
-        {
-            Process.Start(new ProcessStartInfo("code", $"--goto \"{r.FilePath}\":{r.LineNumber}")
-                { UseShellExecute = false });
-            return;
-        }
-        catch { }
-
-        try { Process.Start(new ProcessStartInfo(r.FilePath) { UseShellExecute = true }); }
-        catch { }
-    }
-
-    private static ResultItem? ParseLine(string line)
-    {
-        if (!line.StartsWith('{')) return null;
-        try
-        {
-            using var doc = JsonDocument.Parse(line);
-            var root = doc.RootElement;
-            if (root.GetProperty("type").GetString() != "match") return null;
-            var data  = root.GetProperty("data");
-            var file  = data.GetProperty("path").GetProperty("text").GetString() ?? "";
-            var lineN = data.GetProperty("line_number").GetInt32();
-            var text  = data.GetProperty("lines").GetProperty("text")
-                            .GetString()?.TrimEnd() ?? "";
-            return new ResultItem(file, lineN,
-                $"{System.IO.Path.GetFileName(file)}:{lineN}  {text}");
-        }
-        catch { return null; }
+            RGuiUtils.OpenFile(r);
     }
 }
