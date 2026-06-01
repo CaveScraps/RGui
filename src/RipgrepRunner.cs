@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -58,7 +59,7 @@ public class RipgrepRunner
         if (!_options.UseRegex) proc.StartInfo.ArgumentList.Add("--fixed-strings");
         proc.StartInfo.ArgumentList.Add("--");
         proc.StartInfo.ArgumentList.Add(_options.Pattern);
-        proc.StartInfo.ArgumentList.Add(_options.Path);
+        proc.StartInfo.ArgumentList.Add(Path.GetFullPath(_options.Path));
 
         proc.Start();
         try
