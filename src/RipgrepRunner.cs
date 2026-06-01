@@ -57,9 +57,10 @@ public class RipgrepRunner
         proc.StartInfo.ArgumentList.Add("--json");
         if (!_options.CaseSensitive) proc.StartInfo.ArgumentList.Add("--ignore-case");
         if (!_options.UseRegex) proc.StartInfo.ArgumentList.Add("--fixed-strings");
+        var searchRoot = Path.GetFullPath(_options.Path);
         proc.StartInfo.ArgumentList.Add("--");
         proc.StartInfo.ArgumentList.Add(_options.Pattern);
-        proc.StartInfo.ArgumentList.Add(Path.GetFullPath(_options.Path));
+        proc.StartInfo.ArgumentList.Add(searchRoot);
 
         proc.Start();
         try
@@ -67,7 +68,7 @@ public class RipgrepRunner
             string? line;
             while ((line = await proc.StandardOutput.ReadLineAsync(ct)) != null)
             {
-                var item = RGuiUtils.ParseLine(line);
+                var item = RGuiUtils.ParseLine(line, searchRoot);
                 if (item is not null) yield return item;
             }
             await proc.WaitForExitAsync(ct);

@@ -7,7 +7,7 @@ using System.Text.Json;
 
 namespace RGui;
 
-public record ResultItem(string FilePath, int LineNumber, string Display);
+public record ResultItem(string FilePath, int LineNumber, string PathPart, string MatchText);
 
 // ObservableCollection with AddRange that fires a single Reset notification
 // instead of one CollectionChanged per item, keeping the UI thread unblocked.
@@ -23,7 +23,7 @@ public class BulkObservableCollection<T> : ObservableCollection<T>
 
 public static class RGuiUtils
 {
-    public static ResultItem? ParseLine(string line)
+    public static ResultItem? ParseLine(string line, string searchRoot)
     {
         if (!line.StartsWith('{')) return null;
         try
@@ -37,7 +37,8 @@ public static class RGuiUtils
             var text = data.GetProperty("lines").GetProperty("text")
                             .GetString()?.TrimEnd() ?? "";
             return new ResultItem(file, lineN,
-                $"{Path.GetFileName(file)}:{lineN}  {text}");
+                $"{Path.GetRelativePath(searchRoot, file)}:{lineN}",
+                text);
         }
         catch { return null; }
     }
