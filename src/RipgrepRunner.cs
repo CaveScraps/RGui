@@ -17,7 +17,10 @@ public class RipgrepRunner
     private readonly CancellationToken _ct;
     private readonly ConcurrentQueue<ResultItem> _pending = new();
 
+    public const int ResultCap = 1_000;
+
     public int MatchCount { get; private set; }
+    public bool WasCapped { get; private set; }
 
     public RipgrepRunner(SearchOptions options, CancellationToken ct = default)
     {
@@ -33,6 +36,11 @@ public class RipgrepRunner
             {
                 MatchCount++;
                 _pending.Enqueue(item);
+                if (MatchCount >= ResultCap)
+                {
+                    WasCapped = true;
+                    break;
+                }
             }
         });
     }

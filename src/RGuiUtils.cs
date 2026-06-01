@@ -9,8 +9,8 @@ namespace RGui;
 
 public record ResultItem(string FilePath, int LineNumber, string PathPart, string MatchText);
 
-// ObservableCollection with AddRange that fires a single Reset notification
-// instead of one CollectionChanged per item, keeping the UI thread unblocked.
+// AddRange fires a single Reset notification instead of one per item,
+// keeping the UI thread from being hammered during bulk updates.
 public class BulkObservableCollection<T> : ObservableCollection<T>
 {
     public void AddRange(IEnumerable<T> items)

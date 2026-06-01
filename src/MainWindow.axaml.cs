@@ -55,7 +55,9 @@ public partial class MainWindow : Window
         if (succeeded)
         {
             _results.AddRange(runner.DrainBatch());
-            StatusText.Text = FormatMatchCount(runner.MatchCount);
+            StatusText.Text = runner.WasCapped
+                ? $"Showing first {RipgrepRunner.ResultCap:N0} matches — refine your pattern"
+                : FormatMatchCount(runner.MatchCount);
         }
     }
 

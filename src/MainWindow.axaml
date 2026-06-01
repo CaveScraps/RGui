@@ -77,6 +77,11 @@
         <ListBox x:Name="ResultsList"
                  Margin="12,0,12,8"
                  DoubleTapped="ResultsList_DoubleTapped">
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel/>
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
             <ListBox.ItemTemplate>
                 <DataTemplate x:DataType="local:ResultItem">
                     <Grid ColumnDefinitions="Auto,*">
