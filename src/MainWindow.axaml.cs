@@ -31,34 +31,10 @@ public partial class MainWindow : Window
 
         _results.Clear();
         _cts = new CancellationTokenSource();
-        BeginSearch();
+        SetUiSearching();
 
-        var runner = new RipgrepRunner(options, _cts.Token);
-        var flushTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
-        flushTimer.Tick += (_, _) => _results.AddRange(runner.DrainBatch(200));
-        flushTimer.Start();
-
-        var succeeded = false;
-        try
-        {
-            await runner.RunAsync();
-            succeeded = true;
-        }
-        catch (OperationCanceledException) { StatusText.Text = "Cancelled"; }
-        catch (Exception ex) { StatusText.Text = $"Error: {ex.Message}"; }
-        finally
-        {
-            flushTimer.Stop();
-            EndSearch();
-        }
-
-        if (succeeded)
-        {
-            _results.AddRange(runner.DrainBatch());
-            StatusText.Text = runner.WasCapped
-                ? $"Showing first {RipgrepRunner.ResultCap:N0} matches — refine your pattern"
-                : FormatMatchCount(runner.MatchCount);
-        }
+        StatusText.Text = await RunSearchAsync(options, _cts.Token);
+        SetUiIdle();
     }
 
     private void OnCancel(object? sender, RoutedEventArgs e) => _cts?.Cancel();
@@ -85,6 +61,29 @@ public partial class MainWindow : Window
 
     // --- Helpers ---
 
+    private async Task<string> RunSearchAsync(SearchOptions options, CancellationToken ct)
+    {
+        var runner = new RipgrepRunner(options, ct);
+        var flushTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
+        flushTimer.Tick += (_, _) => _results.AddRange(runner.DrainBatch(200));
+        flushTimer.Start();
+
+        try
+        {
+            await runner.RunAsync();
+            _results.AddRange(runner.DrainBatch());
+            return runner.WasCapped
+                ? $"Showing first {RipgrepRunner.ResultCap:N0} matches — refine your pattern"
+                : $"{runner.MatchCount} {(runner.MatchCount == 1 ? "match" : "matches")}";
+        }
+        catch (OperationCanceledException) { return "Cancelled"; }
+        catch (Exception ex) { return $"Error: {ex.Message}"; }
+        finally
+        {
+            flushTimer.Stop();
+        }
+    }
+
     private SearchOptions? ReadSearchOptions()
     {
         var pattern = PatternBox.Text ?? "";
@@ -92,7 +91,7 @@ public partial class MainWindow : Window
             : new SearchOptions(pattern, PathBox.Text ?? ".", CaseSensitiveCheck.IsChecked ?? true, RegexCheck.IsChecked ?? true);
     }
 
-    private void BeginSearch()
+    private void SetUiSearching()
     {
         SearchBtn.IsEnabled = false;
         CancelBtn.IsEnabled = true;
@@ -101,15 +100,12 @@ public partial class MainWindow : Window
         _ = AnimateDotsAsync();
     }
 
-    private void EndSearch()
+    private void SetUiIdle()
     {
         _animating = false;
         SearchBtn.IsEnabled = true;
         CancelBtn.IsEnabled = false;
     }
-
-    private static string FormatMatchCount(int count) =>
-        $"{count} {(count == 1 ? "match" : "matches")}";
 
     private async Task AnimateDotsAsync()
     {
