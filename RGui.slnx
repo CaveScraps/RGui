@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/RGui.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/RGui.Tests.csproj" />
+  </Folder>
+</Solution>

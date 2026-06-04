@@ -33,20 +33,26 @@ This enables the pre-commit format check (`dotnet format --verify-no-changes`).
 ## Build & Run
 
 ```bash
-dotnet run
+dotnet run --project src/
+```
+
+## Tests
+
+```bash
+dotnet test
 ```
 
 ## Publish (single-file binary)
 
 ```bash
 # Linux
-dotnet publish -c Release -r linux-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+dotnet publish src/ -c Release -r linux-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
 
 # macOS (Apple Silicon)
-dotnet publish -c Release -r osx-arm64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+dotnet publish src/ -c Release -r osx-arm64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
 
 # Windows
-dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+dotnet publish src/ -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
 ```
 Output lands in `bin/Release/net10.0/<rid>/publish/`.
 </details>
