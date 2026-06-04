@@ -13,10 +13,18 @@ public record ResultItem(string FilePath, int LineNumber, string PathPart, strin
 // keeping the UI thread from being hammered during bulk updates.
 public class BulkObservableCollection<T> : ObservableCollection<T>
 {
-    public void AddRange(IEnumerable<T> items)
+    public void AddRange(IList<T> items)
     {
+        if (items.Count == 0)
+        {
+            return;
+        }
+
         foreach (var item in items)
+        {
             Items.Add(item);
+        }
+
         OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
     }
 }
