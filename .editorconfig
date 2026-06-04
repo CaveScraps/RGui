@@ -1,0 +1,35 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.cs]
+# Namespaces
+csharp_style_namespace_declarations = file_scoped:error
+
+# Braces always required
+csharp_prefer_braces = true:error
+
+# Prefer var when type is apparent, allow it elsewhere
+csharp_style_var_for_built_in_types = false:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = true:suggestion
+
+# Expression bodies allowed on single-line members, not constructors
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
+csharp_style_expression_bodied_constructors = false:error
+csharp_style_expression_bodied_properties = when_on_single_line:suggestion
+
+# Null checks
+csharp_style_prefer_null_check_over_type_check = true:error
+dotnet_style_null_propagation = true:suggestion
+dotnet_style_coalesce_expression = true:suggestion
+
+# Unnecessary code
+dotnet_diagnostic.IDE0005.severity = error  # remove unnecessary using directives
+dotnet_diagnostic.IDE0059.severity = error  # remove unnecessary value assignment

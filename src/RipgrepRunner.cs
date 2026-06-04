@@ -49,7 +49,10 @@ public class RipgrepRunner
     {
         var batch = new List<ResultItem>();
         while (batch.Count < maxItems && _pending.TryDequeue(out var item))
+        {
             batch.Add(item);
+        }
+
         return batch;
     }
 
@@ -63,8 +66,16 @@ public class RipgrepRunner
         proc.StartInfo.CreateNoWindow = true;
 
         proc.StartInfo.ArgumentList.Add("--json");
-        if (!_options.CaseSensitive) proc.StartInfo.ArgumentList.Add("--ignore-case");
-        if (!_options.UseRegex) proc.StartInfo.ArgumentList.Add("--fixed-strings");
+        if (!_options.CaseSensitive)
+        {
+            proc.StartInfo.ArgumentList.Add("--ignore-case");
+        }
+
+        if (!_options.UseRegex)
+        {
+            proc.StartInfo.ArgumentList.Add("--fixed-strings");
+        }
+
         var searchRoot = Path.GetFullPath(_options.Path);
         proc.StartInfo.ArgumentList.Add("--");
         proc.StartInfo.ArgumentList.Add(_options.Pattern);
@@ -77,13 +88,19 @@ public class RipgrepRunner
             while ((line = await proc.StandardOutput.ReadLineAsync(ct)) != null)
             {
                 var item = RGuiUtils.ParseLine(line, searchRoot);
-                if (item is not null) yield return item;
+                if (item is not null)
+                {
+                    yield return item;
+                }
             }
             await proc.WaitForExitAsync(ct);
         }
         finally
         {
-            if (!proc.HasExited) proc.Kill(entireProcessTree: true);
+            if (!proc.HasExited)
+            {
+                proc.Kill(entireProcessTree: true);
+            }
         }
     }
 }

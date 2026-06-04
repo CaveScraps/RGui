@@ -9,7 +9,7 @@ using Avalonia.Threading;
 
 namespace RGui;
 
-public partial class MainWindow : Window
+public partial class MainWindow : Window, IDisposable
 {
     private readonly BulkObservableCollection<ResultItem> _results = new();
     private CancellationTokenSource? _cts;
@@ -123,10 +123,16 @@ public partial class MainWindow : Window
         CancelBtn.IsEnabled = false;
     }
 
-    protected override void OnClosed(EventArgs e)
+    public void Dispose()
     {
         _cts?.Cancel();
         _cts?.Dispose();
+        GC.SuppressFinalize(this);
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        Dispose();
         base.OnClosed(e);
     }
 
