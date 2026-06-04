@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
@@ -33,38 +35,87 @@ public static class RGuiUtils
 {
     public static ResultItem? ParseLine(string line, string searchRoot)
     {
-        if (!line.StartsWith('{')) return null;
+        if (!line.StartsWith('{'))
+        {
+            return null;
+        }
+
         try
         {
             using var doc = JsonDocument.Parse(line);
             var root = doc.RootElement;
-            if (root.GetProperty("type").GetString() != "match") return null;
+            if (root.GetProperty("type").GetString() != "match")
+            {
+                return null;
+            }
+
             var data = root.GetProperty("data");
             var file = data.GetProperty("path").GetProperty("text").GetString() ?? "";
-            var lineN = data.GetProperty("line_number").GetInt32();
-            var text = data.GetProperty("lines").GetProperty("text")
-                            .GetString()?.TrimEnd() ?? "";
-            return new ResultItem(file, lineN,
-                $"{Path.GetRelativePath(searchRoot, file)}:{lineN}",
+            var lineNumber = data.GetProperty("line_number").GetInt32();
+            var text = data.GetProperty("lines").GetProperty("text").GetString()?.TrimEnd() ?? "";
+
+            return new ResultItem(file, lineNumber,
+                $"{Path.GetRelativePath(searchRoot, file)}:{lineNumber}",
                 text);
         }
-        catch { return null; }
+        catch (JsonException) { return null; }
+        catch (KeyNotFoundException) { return null; }
+        catch (InvalidOperationException) { return null; }
     }
 
     public static void OpenFile(ResultItem r)
     {
-        // Try VS Code with --goto for line support; fall back to system default
-        try
+        if (IsOnPath("code"))
         {
             var vsCodeStartInfo = new ProcessStartInfo("code") { UseShellExecute = false };
             vsCodeStartInfo.ArgumentList.Add("--goto");
             vsCodeStartInfo.ArgumentList.Add($"{r.FilePath}:{r.LineNumber}");
             Process.Start(vsCodeStartInfo);
-            return;
         }
-        catch { }
+        else
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(r.FilePath) { UseShellExecute = true });
+            }
+            catch (Win32Exception) { }
+            catch (InvalidOperationException) { }
+        }
+    }
 
-        try { Process.Start(new ProcessStartInfo(r.FilePath) { UseShellExecute = true }); }
-        catch { }
+    public static bool IsOnPath(string command)
+    {
+        var paths = Environment.GetEnvironmentVariable("PATH")?.Split(Path.PathSeparator) ?? [];
+
+        IEnumerable<string> extensions;
+        if (OperatingSystem.IsWindows())
+        {
+            var pathExt = Environment.GetEnvironmentVariable("PATHEXT");
+            if (pathExt is null)
+            {
+                // PATHEXT missing means we can't determine valid extensions;
+                // safer to report not found than guess a fallback list.
+                return false;
+            }
+
+            extensions = pathExt.Split(';');
+        }
+        else
+        {
+            extensions = [""];
+        }
+
+        foreach (var path in paths)
+        {
+            foreach (var ext in extensions)
+            {
+                if (File.Exists(Path.Combine(path, command + ext)))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
