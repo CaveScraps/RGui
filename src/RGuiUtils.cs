@@ -48,8 +48,10 @@ public static class RGuiUtils
         // Try VS Code with --goto for line support; fall back to system default
         try
         {
-            Process.Start(new ProcessStartInfo("code", $"--goto \"{r.FilePath}\":{r.LineNumber}")
-            { UseShellExecute = false });
+            var vsCodeStartInfo = new ProcessStartInfo("code") { UseShellExecute = false };
+            vsCodeStartInfo.ArgumentList.Add("--goto");
+            vsCodeStartInfo.ArgumentList.Add($"{r.FilePath}:{r.LineNumber}");
+            Process.Start(vsCodeStartInfo);
             return;
         }
         catch { }
