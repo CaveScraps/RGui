@@ -24,20 +24,7 @@ public partial class MainWindow : Window
 
     // --- Event handlers ---
 
-    private async void OnSearch(object? sender, RoutedEventArgs e)
-    {
-        var options = ReadSearchOptions();
-        if (options is null) return;
-
-        _results.Clear();
-        _cts?.Cancel();
-        _cts?.Dispose();
-        _cts = new CancellationTokenSource();
-        SetUiSearching();
-
-        StatusText.Text = await RunSearchAsync(options, _cts.Token);
-        SetUiIdle();
-    }
+    private async void OnSearch(object? sender, RoutedEventArgs e) => await SubmitSearch();
 
     private void OnCancel(object? sender, RoutedEventArgs e) => _cts?.Cancel();
 
@@ -45,23 +32,50 @@ public partial class MainWindow : Window
     {
         var result = await StorageProvider.OpenFolderPickerAsync(
             new FolderPickerOpenOptions { Title = "Select search root", AllowMultiple = false });
+
         if (result.Count > 0)
+        {
             PathBox.Text = result[0].Path.LocalPath;
+        }
     }
 
-    private void PatternBox_KeyDown(object? sender, KeyEventArgs e)
+    private async void PatternBox_KeyDown(object? sender, KeyEventArgs e)
     {
         if (e.Key == Key.Return && SearchBtn.IsEnabled)
-            OnSearch(null, null!);
+        {
+            await SubmitSearch();
+        }
     }
 
     private void ResultsList_DoubleTapped(object? sender, TappedEventArgs e)
     {
         if (ResultsList.SelectedItem is ResultItem r)
+        {
             RGuiUtils.OpenFile(r);
+        }
     }
 
     // --- Helpers ---
+
+    private async Task SubmitSearch()
+    {
+        var options = ReadSearchOptions();
+        if (options is null)
+        {
+            return;
+        }
+
+        _results.Clear();
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = new CancellationTokenSource();
+        SetUiSearching();
+
+        // No try/catch needed — RunSearchAsync handles all exceptions internally
+        // and always returns a status string.
+        StatusText.Text = await RunSearchAsync(options, _cts.Token);
+        SetUiIdle();
+    }
 
     private async Task<string> RunSearchAsync(SearchOptions options, CancellationToken ct)
     {
@@ -125,6 +139,7 @@ public partial class MainWindow : Window
             DotsText.Text = frames[i++ % 3];
             await Task.Delay(400);
         }
+
         DotsText.Text = "";
     }
 }
