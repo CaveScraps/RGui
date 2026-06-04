@@ -30,6 +30,8 @@ public partial class MainWindow : Window
         if (options is null) return;
 
         _results.Clear();
+        _cts?.Cancel();
+        _cts?.Dispose();
         _cts = new CancellationTokenSource();
         SetUiSearching();
 
@@ -105,6 +107,13 @@ public partial class MainWindow : Window
         _animating = false;
         SearchBtn.IsEnabled = true;
         CancelBtn.IsEnabled = false;
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        _cts?.Cancel();
+        _cts?.Dispose();
+        base.OnClosed(e);
     }
 
     private async Task AnimateDotsAsync()
