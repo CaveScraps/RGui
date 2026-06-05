@@ -35,7 +35,8 @@ public partial class MainWindow : Window, IDisposable
 
         if (result.Count > 0)
         {
-            PathBox.Text = result[0].Path.LocalPath;
+            // Path.LocalPath throws for relative URIs (e.g. picking a different drive on Windows), so try TryGetLocalPath first
+            PathBox.Text = result[0].TryGetLocalPath() ?? result[0].Path.ToString();
         }
     }
 
