@@ -84,18 +84,19 @@
             </ListBox.ItemsPanel>
             <ListBox.ItemTemplate>
                 <DataTemplate x:DataType="local:ResultItem">
-                    <Grid ColumnDefinitions="Auto,*">
+                    <Grid ColumnDefinitions="370,*">
                         <TextBlock Grid.Column="0"
                                    Text="{Binding PathPart}"
                                    FontFamily="Cascadia Code,Consolas,Courier New,monospace"
                                    FontSize="18"
-                                   Opacity="0.5"/>
+                                   Opacity="0.5"
+                                   ClipToBounds="True"/>
                         <TextBlock Grid.Column="1"
                                    Text="{Binding MatchText}"
                                    FontFamily="Cascadia Code,Consolas,Courier New,monospace"
                                    FontSize="18"
                                    Margin="16,0,0,0"
-                                   TextTrimming="CharacterEllipsis"/>
+                                   ClipToBounds="True"/>
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>
