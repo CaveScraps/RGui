@@ -14,8 +14,10 @@ A cross-platform desktop GUI for [ripgrep](https://github.com/BurntSushi/ripgrep
 
 ## Requirements
 
-- [.NET 10](https://dotnet.microsoft.com/download)
-- [ripgrep](https://github.com/BurntSushi/ripgrep#installation) (`rg` must be on your `PATH`)
+ripgrep is **bundled** with RGui — no separate install is needed. The published
+binary ships the matching `rg` alongside it and runs that copy.
+
+Building from source additionally requires [.NET 10](https://dotnet.microsoft.com/download).
 
 ## Development Setup
 
@@ -35,6 +37,11 @@ This enables the pre-commit format check (`dotnet format --verify-no-changes`).
 ```bash
 dotnet run --project src/
 ```
+
+The bundled `rg` is copied from `vendor/rg/<rid>/` (see `vendor/rg/README.md`).
+On publish this is the target runtime; on a plain `dotnet run` it falls back to
+the host runtime, so development works as long as the matching binary has been
+vendored.
 
 ## Tests
 
@@ -59,7 +66,7 @@ Output lands in `bin/Release/net10.0/<rid>/publish/`.
 
 ## Acknowledgements
 
-This project is a GUI wrapper around [ripgrep](https://github.com/BurntSushi/ripgrep) by Andrew Gallant, which is licensed under the [MIT License](https://github.com/BurntSushi/ripgrep/blob/master/LICENSE-MIT).
+This project bundles and wraps [ripgrep](https://github.com/BurntSushi/ripgrep) by Andrew Gallant, which is dual-licensed under [The Unlicense](https://github.com/BurntSushi/ripgrep/blob/master/UNLICENSE) or the [MIT License](https://github.com/BurntSushi/ripgrep/blob/master/LICENSE-MIT). Its license terms permit redistribution of the binary.
 
 ## License
 

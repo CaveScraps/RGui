@@ -10,6 +10,39 @@
     <BaseOutputPath>../bin/</BaseOutputPath>
   </PropertyGroup>
 
+  <!--
+    Bundle the ripgrep binary next to the executable. On publish this is the
+    target RID; on a plain build/run (no -r) it falls back to the host RID so
+    `dotnet run` works during development. <Link> flattens the binary to the
+    output/publish root so RGuiUtils.BundledRgPath finds it. Guarded with
+    Exists() so the build still succeeds before the per-RID binaries have been
+    vendored into ../vendor/rg/. See vendor/rg/README.md.
+  -->
+  <PropertyGroup>
+    <_BundleRid>$(RuntimeIdentifier)</_BundleRid>
+    <_BundleRid Condition="'$(_BundleRid)' == '' And $([MSBuild]::IsOSPlatform('Windows'))">win-x64</_BundleRid>
+    <_BundleRid Condition="'$(_BundleRid)' == '' And $([MSBuild]::IsOSPlatform('Linux'))">linux-x64</_BundleRid>
+    <_BundleRid Condition="'$(_BundleRid)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">osx-arm64</_BundleRid>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="../vendor/rg/win-x64/rg.exe"
+             Condition="'$(_BundleRid)' == 'win-x64' And Exists('../vendor/rg/win-x64/rg.exe')">
+      <Link>rg.exe</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="../vendor/rg/linux-x64/rg"
+             Condition="'$(_BundleRid)' == 'linux-x64' And Exists('../vendor/rg/linux-x64/rg')">
+      <Link>rg</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="../vendor/rg/osx-arm64/rg"
+             Condition="'$(_BundleRid)' == 'osx-arm64' And Exists('../vendor/rg/osx-arm64/rg')">
+      <Link>rg</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="12.0.4" />
     <PackageReference Include="Avalonia.Desktop" Version="12.0.4" />

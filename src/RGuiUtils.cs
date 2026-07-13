@@ -33,6 +33,11 @@ public class BulkObservableCollection<T> : ObservableCollection<T>
 
 public static class RGuiUtils
 {
+    // ripgrep is bundled alongside the executable; we always run that copy
+    // (resolved by full path so it works regardless of PATH or platform).
+    public static readonly string BundledRgPath =
+        Path.Combine(AppContext.BaseDirectory, OperatingSystem.IsWindows() ? "rg.exe" : "rg");
+
     public static ResultItem? ParseLine(string line, string searchRoot)
     {
         if (!line.StartsWith('{'))

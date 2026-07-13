@@ -30,9 +30,10 @@ sealed class RgNotFoundWindow : Window
             {
                 new TextBlock
                 {
-                    Text = "ripgrep (rg) was not found.\n\n" +
-                           "Install it and ensure it is on your PATH, " +
-                           "or place it alongside the RGui executable.",
+                    Text = "The bundled ripgrep (rg) executable was not found " +
+                           "next to RGui.\n\n" +
+                           "Your installation may be incomplete — try reinstalling, " +
+                           "or place the rg executable alongside RGui.",
                     Margin = new Thickness(20),
                     TextWrapping = TextWrapping.Wrap,
                     MaxWidth = 380

@@ -59,7 +59,7 @@ public class RipgrepRunner
     private async IAsyncEnumerable<ResultItem> StreamAsync([EnumeratorCancellation] CancellationToken ct)
     {
         using var proc = new Process();
-        proc.StartInfo.FileName = "rg";
+        proc.StartInfo.FileName = RGuiUtils.BundledRgPath;
         proc.StartInfo.UseShellExecute = false;
         proc.StartInfo.RedirectStandardOutput = true;
         proc.StartInfo.StandardOutputEncoding = Encoding.UTF8;
