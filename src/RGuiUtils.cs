@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Text.Json;
 
 namespace RGui;
@@ -55,9 +56,9 @@ public static class RGuiUtils
             }
 
             var data = root.GetProperty("data");
-            var file = data.GetProperty("path").GetProperty("text").GetString() ?? "";
+            var file = ReadArbitraryData(data.GetProperty("path")) ?? "";
             var lineNumber = data.GetProperty("line_number").GetInt32();
-            var text = data.GetProperty("lines").GetProperty("text").GetString()?.TrimEnd() ?? "";
+            var text = ReadArbitraryData(data.GetProperty("lines"))?.TrimEnd() ?? "";
 
             return new ResultItem(file, lineNumber,
                 $"{Path.GetRelativePath(searchRoot, file)}:{lineNumber}",
@@ -66,6 +67,27 @@ public static class RGuiUtils
         catch (JsonException) { return null; }
         catch (KeyNotFoundException) { return null; }
         catch (InvalidOperationException) { return null; }
+        catch (FormatException) { return null; }
+    }
+
+    // ripgrep encodes paths and match text as "arbitrary data": a "text" field
+    // when the content is valid UTF-8, or a base64 "bytes" field when it isn't.
+    // Decode either form so non-UTF-8 results aren't silently dropped. Bytes are
+    // decoded as UTF-8 with replacement characters, so a non-UTF-8 file name
+    // displays but may not round-trip back to disk when opened — best-effort.
+    private static string? ReadArbitraryData(JsonElement element)
+    {
+        if (element.TryGetProperty("text", out var text))
+        {
+            return text.GetString();
+        }
+
+        if (element.TryGetProperty("bytes", out var bytes))
+        {
+            return Encoding.UTF8.GetString(bytes.GetBytesFromBase64());
+        }
+
+        return null;
     }
 
     public static void OpenFile(ResultItem r)
